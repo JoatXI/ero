@@ -1,5 +1,5 @@
 from mss import mss
-from ffmpeg import FFmpeg
+from ffmpeg import FFmpeg, Progress
 import numpy as np
 import time
 import cv2
@@ -28,19 +28,33 @@ def screen_capture():
         
 def save_recording():
     height, width, _ = frames[0].shape
-    video_writer = cv2.VideoWriter('default_video.mp4', cv2.VideoWriter_fourcc(*'mp4v'), FPS, (width, height))
+    print("shape set")
+    ffmpeg = (
+        FFmpeg()
+        .option("y")
+        .input('pipe:', format='rawvideo', pix_fmt='rgb24', s=f'{width}x{height}')
+        .output("default.mp4", vcodec='libx264', pix_fmt='yuv420p', r=FPS)
+    )
+    print("executing...")
+    process = ffmpeg.execute()
     
-    for img in frames:
-        video_writer.write(cv2.cvtColor(img, cv2.COLOR_RGBA2RGB))
-    video_writer.release()
+    print("Write frames to FFmpeg stdin")
+    for frame in frames:
+        print("in frame loop")
+        process.stdin.write(frame.tobytes())
     
+    print("closing...")
+    process.stdin.close()
+    process.wait()
     
 def main():
     global running
-    threading.Thread(target=screen_capture).start()
+    capture_thread = threading.Thread(target=screen_capture, daemon=True)
+    capture_thread.start()
     
     time.sleep(10) # Sets recording duration
     running = False
+    capture_thread.join()
     
     print('Saving video...')
     save_recording()
