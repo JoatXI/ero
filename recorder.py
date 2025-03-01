@@ -1,13 +1,19 @@
+import wave
 from mss import mss
 import numpy as np
 import time
 import threading
 import subprocess
 from ffmpeg import FFmpeg, Progress
+import pyaudio
 
 WIDTH, HEIGHT = 1920, 1080
 running = True
 FPS = 30
+# Audio recording settings
+RATE, CHUNK = 44100, 1024
+CHANNELS, OUTPUT_AUDIO = 2, "output.wav"
+FORMAT = pyaudio.paInt16
 
 def ffmpeg_encoder():
     # Can we tell ffmpeg to read in from memory (i.e. your frames) as an input source, rather than standard input?
@@ -44,14 +50,46 @@ def screen_capture():
         process.stdin.close()
         process.wait()
 
+def record_audio():
+    p = pyaudio.PyAudio()
+    stream = p.open(format=FORMAT,
+                    channels=CHANNELS,
+                    rate=RATE,
+                    input=True,
+                    input_device_index=2,
+                    frames_per_buffer=CHUNK)
+
+    audio_frames = []
+
+    while running:
+        data = stream.read(CHUNK)
+        audio_frames.append(data)
+
+    # Stop & save audio
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    with wave.open(OUTPUT_AUDIO, "wb") as wf:
+        wf.setnchannels(CHANNELS)
+        wf.setsampwidth(p.get_sample_size(FORMAT))
+        wf.setframerate(RATE)
+        wf.writeframes(b"".join(audio_frames))
+        wf.close()
+
 def main():
     global running
     capture_thread = threading.Thread(target=screen_capture, daemon=True)
+    audio_thread = threading.Thread(target=record_audio, daemon=True)
+    
     capture_thread.start()
+    audio_thread.start()
     
     time.sleep(10)
     running = False
+    
     capture_thread.join()
+    audio_thread.join()
     
     print('Video saved.')
     
