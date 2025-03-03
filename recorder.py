@@ -1,59 +1,77 @@
-from mss import mss
+from ffmpeg import FFmpeg, Progress, FFmpegError
+from win32api import GetSystemMetrics
+from mss import mss, exception
 import numpy as np
-import time
-import threading
 import subprocess
-from ffmpeg import FFmpeg, Progress
+import threading
+import keyboard
+import datetime
+import time
 
-WIDTH, HEIGHT = 1920, 1080
+WIDTH, HEIGHT = GetSystemMetrics(0), GetSystemMetrics(1) # Gets monitor dimensions
 running = True
 FPS = 30
+OUTPUT_FILE = f"{datetime.datetime.now().strftime("%Y_%m_%d %H_%M_%S")}.mkv"
 
 def ffmpeg_encoder():
     # Can we tell ffmpeg to read in from memory (i.e. your frames) as an input source, rather than standard input?
     AUDIO_DEVICE = "Stereo Mix (Realtek(R) Audio)"
     
-    ffmpeg = (
-        FFmpeg()
-        .option("y")  # Overwrite existing file
-        .input(f"audio={AUDIO_DEVICE}", f="dshow", t=10)
-        .input("pipe:0", f="rawvideo", s=f"{WIDTH}x{HEIGHT}", pix_fmt="bgra", r=FPS)
-        .output("default.mkv", vcodec="libx264", pix_fmt="yuv420p")
-    )
-
-    @ffmpeg.on("progress")
-    def on_progress(progress: Progress):
-        print(progress)
-
-    # Start FFmpeg process using stdin for real-time frame input
-    return subprocess.Popen(ffmpeg.arguments, stdin=subprocess.PIPE)
+    try:
+        ffmpeg = (
+            FFmpeg()
+            .option("y")  # Overwrite existing file
+            .input(f"audio={AUDIO_DEVICE}", f="dshow")
+            .input("pipe:0", f="rawvideo", s=f"{WIDTH}x{HEIGHT}", pix_fmt="bgra", r=FPS)
+            .output(OUTPUT_FILE, vcodec="libx264", pix_fmt="yuv420p")
+        )
+        
+        # Start FFmpeg process using stdin for real-time frame input
+        return subprocess.Popen(ffmpeg.arguments, stdin=subprocess.PIPE)
+    
+    except FFmpegError as exception:
+        print("An exception has occurred!")
+        print("- Message from ffmpeg:", exception.message)
+        print("- Arguments to execute ffmpeg:", exception.arguments)
 
 def screen_capture():
-    with mss() as sct:
-        # Define screen capture settings
-        monitor = {"top": 0, "left": 0, "width": WIDTH, "height": HEIGHT}
-        
-        process = ffmpeg_encoder()
-        while running:
-            last_time = time.time()
+    try:
+        with mss() as sct:
+            # Define screen monitor capture settings
+            monitor = {"top": 0, "left": 0, "width": WIDTH, "height": HEIGHT}
             
-            # Capture screen frame
-            frame = np.array(sct.grab(monitor))
-            process.stdin.write(frame.tobytes()) # write raw bytes to standard input?
+            process = ffmpeg_encoder()
+            while running:
+                # Capture screen frame
+                frame = np.array(sct.grab(monitor))
+                process.stdin.write(frame.tobytes()) # write raw bytes to standard input?
+                
+                time.sleep(1.0 / FPS)
             
-            time_diff = time.time() - last_time
-            time.sleep(max(1.0 / FPS - time_diff, 0))
-        
-        process.stdin.close()
-        process.wait()
+            process.stdin.close()
+            process.terminate()
+            process.wait()
+            
+    except exception.ScreenShotError as e:
+        print("An error occurred while acquiring screen capture: ", e)
+
+def end_recording():
+    global running
+    print("\n",keyboard.read_key())
+    
+    if keyboard.read_key() == "esc":
+        print("\nStopping Recording...")
+        running = False
 
 def main():
     global running
+    
+    stopper = threading.Thread(target=end_recording, daemon=True)
+    stopper.start()
+    
     capture_thread = threading.Thread(target=screen_capture, daemon=True)
     capture_thread.start()
     
-    time.sleep(10)
-    running = False
     capture_thread.join()
     
     print('Video saved.')
