@@ -21,7 +21,7 @@ def ffmpeg_encoder():
         ffmpeg = (
             FFmpeg()
             .option("y")  # Overwrite existing file
-            .input(f"audio={AUDIO_DEVICE}", f="dshow")
+            .input(f"audio={AUDIO_DEVICE}", f="dshow", t=10)
             .input("pipe:0", f="rawvideo", s=f"{WIDTH}x{HEIGHT}", pix_fmt="bgra", r=FPS)
             .output(OUTPUT_FILE, vcodec="libx264", pix_fmt="yuv420p")
         )
@@ -49,7 +49,6 @@ def screen_capture():
                 time.sleep(1.0 / FPS)
             
             process.stdin.close()
-            process.terminate()
             process.wait()
             
     except exception.ScreenShotError as e:
