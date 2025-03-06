@@ -21,7 +21,7 @@ def ffmpeg_encoder():
         ffmpeg = (
             FFmpeg()
             .option("y")  # Overwrite existing file
-            .input(f"audio={AUDIO_DEVICE}", f="dshow", t=10)
+            .input(f"audio={AUDIO_DEVICE}", f="dshow", ac=2, ar=44100, audio_buffer_size="80m", t=10)
             .input("pipe:0", f="rawvideo", s=f"{WIDTH}x{HEIGHT}", pix_fmt="bgra", r=FPS)
             .output(OUTPUT_FILE, vcodec="libx264", pix_fmt="yuv420p")
         )
