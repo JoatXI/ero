@@ -12,7 +12,6 @@ FPS = 30
 OUTPUT_FILE = f"{datetime.datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.mkv"
 
 def ffmpeg_encoder():
-    # Can we tell ffmpeg to read in from memory (i.e. your frames) as an input source, rather than standard input?
     AUDIO_DEVICE = "Stereo Mix (Realtek(R) Audio)"
     
     try:
@@ -23,21 +22,19 @@ def ffmpeg_encoder():
         
         ffmpeg = (
             FFmpeg()
-            .option("y")  # Overwrite existing file
-            .input(f"audio={AUDIO_DEVICE}", f="dshow", ac=2, ar=44100, audio_buffer_size="80m")
+            .option("y")
             .input("pipe:0", f="rawvideo", s=f"{WIDTH}x{HEIGHT}", pix_fmt="bgra", r=FPS)
-            .output(OUTPUT_FILE, vcodec="libx264", pix_fmt="yuv420p")
+            .input(f"audio={AUDIO_DEVICE}", rtbufsize="1024M", f="dshow", ac=2, ar=44100, channel_layout="stereo", audio_buffer_size="80m")
+            .output(OUTPUT_FILE, vcodec="libx264", pix_fmt="yuv420p", preset="slow", crf=22, shortest=None)
         )
         
         @ffmpeg.on("progress")
         def time_to_terminate(progress: Progress):
-            # If you have recorded more than 200 frames, stop recording
             print(progress)
             if not running:
                 print('\nterminating recording...')
                 ffmpeg.terminate()
                 
-        # Start FFmpeg process using stdin for real-time frame input
         print('\nencoding video...\n')
         ffmpeg.execute(mss_stream.stdout)
     

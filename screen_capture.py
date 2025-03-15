@@ -13,7 +13,6 @@ FPS = 30
 def screen_capture():
     try:
         with mss() as sct:
-            # Define screen monitor capture settings
             monitor = {"top": 0, "left": 0, "width": WIDTH, "height": HEIGHT}
             
             while running:
