@@ -1,5 +1,5 @@
 # ẹro 
-ẹro (pronounced “Eye”, from the Urhobo language) is a Python-based screen recording solution designed to automate key aspects of screen capture. Its primary goal is to start and end recording sessions autonomously based on configurable triggers, reducing manual intervention and streamlining the recording process.
+ẹro (translate to “Eye”, in the Urhobo language) is a Python-based screen recording solution designed to automate key aspects of screen capture. Its primary goal is to start and end recording sessions autonomously based on configurable triggers, reducing manual intervention and streamlining the recording process.
 
 ## Purpose
 The objective of ẹro is to provide a robust screen recording solution that:
