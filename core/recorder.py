@@ -25,9 +25,9 @@ class Encoder:
             ffmpeg = (
                 FFmpeg()
                 .option("y")
-                .input("pipe:0", f="rawvideo", s=f"{self.width}x{self.height}", pix_fmt="bgra", r=self.fps)
+                .input("pipe:0", f="rawvideo", s=f"{self.width}x{self.height}", pix_fmt="bgra", framerate=self.fps)
                 .input(f"audio={self.audio_device}", rtbufsize="1024M", f=self.input_format, ac=2, ar=44100, channel_layout="stereo", audio_buffer_size="80m")
-                .output(self.file_name, acodec="copy", vcodec=self.encoder, pix_fmt="yuv420p", preset="slow", crf=22, shortest=None)
+                .output(self.file_name, vcodec=self.encoder, pix_fmt="yuv420p", vsync=1, shortest=None, af="aresample=async=1")
             )
             
             @ffmpeg.on("progress")
