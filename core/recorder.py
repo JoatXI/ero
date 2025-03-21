@@ -1,6 +1,5 @@
 from ffmpeg import FFmpeg, Progress, FFmpegError
 from settings import FFmpegSettings
-import subprocess
 import threading
 import pyautogui
 import keyboard
@@ -10,24 +9,19 @@ class Encoder:
     def __init__(self, fps=30):
         self.file_name = f"{datetime.datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.mkv"
         self.audio_device, self.input_format = FFmpegSettings().set_audio_inputs()
-        self.encoder = FFmpegSettings().set_encoder()
+        self.video_input, self.f_video = FFmpegSettings().set_video_inputs()
         self.width, self.height = pyautogui.size()
         self.running = False
         self.fps = fps
         
     def ffmpeg_encoder(self):
         try:
-            mss_stream = subprocess.Popen(
-                'python core/frame_capture.py',
-                stdout=subprocess.PIPE
-            )
-            
             ffmpeg = (
                 FFmpeg()
                 .option("y")
-                .input("pipe:0", f="rawvideo", s=f"{self.width}x{self.height}", pix_fmt="bgra", framerate=self.fps)
+                .input(self.video_input, f=self.f_video, framerate=self.fps, offset_x=0, offset_y=0, video_size=f"{self.width}x{self.height}", show_region=1)
                 .input(f"audio={self.audio_device}", rtbufsize="1024M", f=self.input_format, ac=2, ar=44100, channel_layout="stereo", audio_buffer_size="80m")
-                .output(self.file_name, vcodec=self.encoder, pix_fmt="yuv420p", vsync=1, shortest=None, af="aresample=async=1")
+                .output(self.file_name, acodec="libmp3lame", vcodec="libx264", crf=23, preset="ultrafast", pix_fmt="yuv420p", fps_mode="passthrough")
             )
             
             @ffmpeg.on("progress")
@@ -38,7 +32,7 @@ class Encoder:
                     ffmpeg.terminate()
                     
             print('\nencoding video...\n')
-            ffmpeg.execute(mss_stream.stdout)
+            ffmpeg.execute()
         
         except FFmpegError as exception:
             print("An exception has occurred!")
