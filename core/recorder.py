@@ -19,9 +19,9 @@ class Encoder:
             ffmpeg = (
                 FFmpeg()
                 .option("y")
-                .input(self.video_input, f=self.f_video, framerate=self.fps, offset_x=0, offset_y=0, video_size=f"{self.width}x{self.height}", show_region=1)
-                .input(f"audio={self.audio_device}", rtbufsize="1024M", f=self.input_format, ac=2, ar=44100, channel_layout="stereo", audio_buffer_size="80m")
-                .output(self.file_name, acodec="libmp3lame", vcodec="libx264", crf=23, preset="ultrafast", pix_fmt="yuv420p", fps_mode="passthrough")
+                .input(self.video_input, f=self.f_video, framerate=self.fps, offset_x=0, offset_y=0, video_size=f"{self.width}x{self.height}")
+                .input(f"audio={self.audio_device}", rtbufsize="1024M", f=self.input_format, ac=2, ar=22050, channel_layout="stereo", audio_buffer_size="80m", itsoffset=0.5)
+                .output(self.file_name, acodec="libmp3lame", vcodec="libx264", crf=23, preset="ultrafast", pix_fmt="yuv420p")
             )
             
             @ffmpeg.on("progress")
