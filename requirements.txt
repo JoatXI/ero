@@ -1,7 +1,6 @@
 python-ffmpeg
 pyautogui
 keyboard
-py-cpuinfo
-GPUtil
-mss
+psutil
 numpy
+mss

@@ -1,16 +1,8 @@
 import platform
-import cpuinfo
-import GPUtil
 
 class FFmpegSettings:
     def __init__(self):
-        self.nvidia_gpu = GPUtil.getGPUs()
-        self.info = cpuinfo.get_cpu_info()
         self.os = platform.system()
-        self.amd_gpu = False
-        
-    def __repr__(self):
-        return f"\nSettings(os={self.os}, CPU={self.info}, Nvidia GPU={self.nvidia_gpu}, AMD GPU?={self.amd_gpu})"
     
     def set_audio_inputs(self):
         if self.os == "Windows":
@@ -24,7 +16,7 @@ class FFmpegSettings:
         raise Exception("Unknown Operating System")
 
     def set_video_inputs(self):
-        print(self.os)
+        print(f'\n{self.os}')
 
         try:
             if self.os == "Windows":
@@ -36,4 +28,4 @@ class FFmpegSettings:
                 f_video = "x11grab"
                 return video_input, f_video
         except Exception as e:
-            print("Error setting encoder:", e)
+            print("Error occured while setting video inputs:", e)
