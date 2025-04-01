@@ -3,6 +3,9 @@ import platform
 class FFmpegSettings:
     def __init__(self):
         self.os = platform.system()
+
+    def get_operating_system(self):
+        return self.os
     
     def set_audio_inputs(self):
         if self.os == "Windows":
@@ -10,7 +13,7 @@ class FFmpegSettings:
             input_format = "dshow"
             return audio_device, input_format
         elif self.os == "Linux":
-            audio_device = "default"
+            audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo.monitor"
             input_format = "pulse"
             return audio_device, input_format
         raise Exception("Unknown Operating System")
