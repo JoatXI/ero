@@ -1,6 +1,7 @@
-from settings import FFmpegSettings
-import subprocess
 from pynput.keyboard import Key, Controller
+from settings import FFmpegSettings
+from plyer import notification
+import subprocess
 import psutil
 import time
 
@@ -16,6 +17,14 @@ def running_programs():
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             return False
         
+def system_notification(title, message):
+    notification.notify(
+        title=title,
+        message=message,
+        app_icon='core/icon.ico',
+        timeout=5
+    )
+
 def program_listener():
     recording_process = None
     recording_started = False
@@ -27,21 +36,27 @@ def program_listener():
             
             if app_running and not recording_started:
                 print("\nTracked app detected. Starting recording...")
+                
                 if os == "Windows":
                     recording_process = subprocess.Popen(["python", "core/recorder.py"])
                     recording_started = True
+                    system_notification('Screen Recording', 'started ero screen recorder')
                 elif os == "Linux":
                     recording_process = subprocess.Popen(["python3", "core/linux_recorder.py"])
                     recording_started = True
+                    system_notification('Screen Recording', 'started ero screen recorder')
 
             elif not app_running and recording_started:
                 print("\nTracked app closed. Stopping recording...")
                 
                 keyboard.press(key=Key.esc)
                 keyboard.release(key=Key.esc)
+
                 if recording_process:
                     recording_process.wait()
                 recording_started = False
+                
+                system_notification('Recording Stopped', 'application closed')
                 program_listener()
 
             time.sleep(2)

@@ -2,3 +2,4 @@ python-ffmpeg
 pyautogui
 pynput
 psutil
+plyer
