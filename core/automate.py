@@ -9,7 +9,7 @@ track_apps_process = ['chrome', 'chrome.exe', 'winword.exe', 'notepad', 'notepad
 os = FFmpegSettings().get_operating_system()
 keyboard = Controller()
 
-def running_programs():
+def running_procresses():
     for proc in psutil.process_iter(['name']):
         try:
             if proc.info['name'].lower() in track_apps_process:
@@ -25,29 +25,29 @@ def system_notification(title, message):
         timeout=5
     )
 
-def program_listener():
+def automate_recoder():
     recording_process = None
     recording_started = False
 
-    print("\nMonitoring for Tracked Applications launch...")
+    print('\nMonitoring for Tracked Applications launch...')
     try:
         while True:
-            app_running = running_programs()
+            app_running = running_procresses()
             
             if app_running and not recording_started:
-                print("\nTracked app detected. Starting recording...")
+                print('\nTracked app detected. Starting recording...')
                 
-                if os == "Windows":
-                    recording_process = subprocess.Popen(["python", "core/recorder.py"])
+                if os == 'Windows':
+                    recording_process = subprocess.Popen(['python', 'core/recorder.py'])
                     recording_started = True
-                    system_notification('Screen Recording', 'started ero screen recorder')
-                elif os == "Linux":
-                    recording_process = subprocess.Popen(["python3", "core/linux_recorder.py"])
+                    system_notification('Ẹro', 'Application started screen and audio recording')
+                elif os == 'Linux':
+                    recording_process = subprocess.Popen(['python3', 'core/linux_recorder.py'])
                     recording_started = True
-                    system_notification('Screen Recording', 'started ero screen recorder')
+                    system_notification('Ẹro', 'Application started screen and audio recording')
 
             elif not app_running and recording_started:
-                print("\nTracked app closed. Stopping recording...")
+                print('\nTracked app closed. Stopping recording...')
                 
                 keyboard.press(key=Key.esc)
                 keyboard.release(key=Key.esc)
@@ -56,13 +56,13 @@ def program_listener():
                     recording_process.wait()
                 recording_started = False
                 
-                system_notification('Recording Stopped', 'application closed')
-                program_listener()
+                system_notification('Ẹro', 'Application recording stopped')
+                automate_recoder()
 
             time.sleep(2)
     except KeyboardInterrupt:
-        print("\nAutomation script interrupted. Exiting...")
-        return None
+        print('\nAutomation script interrupted. Exiting...')
+        SystemExit
 
-if __name__ == "__main__":
-    program_listener()
+if __name__ == '__main__':
+    automate_recoder()

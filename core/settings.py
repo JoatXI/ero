@@ -13,7 +13,7 @@ class FFmpegSettings:
             input_format = "dshow"
             return audio_device, input_format
         elif self.os == "Linux":
-            audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo.monitor"
+            audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo"
             input_format = "pulse"
             return audio_device, input_format
         raise Exception("Unknown Operating System")
@@ -32,3 +32,4 @@ class FFmpegSettings:
                 return video_input, f_video
         except Exception as e:
             print("Error occured while setting video inputs:", e)
+            SystemExit
