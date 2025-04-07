@@ -4,6 +4,7 @@ from plyer import notification
 import subprocess
 import psutil
 import time
+import sys
 
 track_apps_process = ['chrome', 'chrome.exe', 'winword.exe', 'notepad', 'notepad.exe']
 os = FFmpegSettings().get_operating_system()
@@ -62,7 +63,7 @@ def automate_recoder():
             time.sleep(2)
     except KeyboardInterrupt:
         print('\nAutomation script interrupted. Exiting...')
-        SystemExit
+        sys.exit(1)
 
 if __name__ == '__main__':
     automate_recoder()

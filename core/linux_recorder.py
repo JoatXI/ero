@@ -3,16 +3,15 @@ from settings import FFmpegSettings
 from pynput import keyboard
 import threading
 import pyautogui
-import datetime
+import sys
 
 class Encoder:
-    def __init__(self, fps=30):
-        self.file_name = f"{datetime.datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.mkv"
+    def __init__(self):
         self.audio_device, self.input_format = FFmpegSettings().set_audio_inputs()
         self.video_input, self.f_video = FFmpegSettings().set_video_inputs()
+        self.file_name, self.fps = FFmpegSettings().set_output()
         self.width, self.height = pyautogui.size()
         self.running = False
-        self.fps = fps
         
     def ffmpeg_encoder(self):
         try:
@@ -38,6 +37,7 @@ class Encoder:
             print("An exception has occurred!")
             print("- Message from ffmpeg:", exception.message)
             print("- Arguments to execute ffmpeg:", exception.arguments)
+            sys.exit(1)
 
     def on_press(self, key):
         if key == keyboard.Key.esc:
