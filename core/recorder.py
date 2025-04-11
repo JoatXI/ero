@@ -1,9 +1,7 @@
 from ffmpeg import FFmpeg, Progress, FFmpegError
 from settings import FFmpegSettings
-from pynput import keyboard
-import threading
+import threading, sys
 import pyautogui
-import sys
 
 class Encoder:
     def __init__(self):
@@ -11,6 +9,7 @@ class Encoder:
         self.video_input, self.f_video = FFmpegSettings().set_video_inputs()
         self.file_name, self.fps = FFmpegSettings().set_output()
         self.width, self.height = pyautogui.size()
+        self.encoding_thread = None
         self.running = False
         
     def ffmpeg_encoder(self):
@@ -39,22 +38,18 @@ class Encoder:
             print("- Arguments to execute ffmpeg:", exception.arguments)
             sys.exit(1)
 
-    def on_press(self, key):
-        if key == keyboard.Key.esc:
-            print("\nStopping Recording...")
-            self.running = False
-            return False
-
-    def start_recording(self):
+    def start_windows_recording(self):
         self.running = True
-        
-        encoding_thread = threading.Thread(target=self.ffmpeg_encoder)
-        encoding_thread.start()
-        
-        with keyboard.Listener(on_press=self.on_press) as listener:
-            encoding_thread.join()
+        self.encoding_thread = threading.Thread(target=self.ffmpeg_encoder)
+        self.encoding_thread.start()
+    
+    def stop_windows_recording(self):
+        print("\nStopping Recording...")
+        self.running = False
+        if self.encoding_thread:
+            self.encoding_thread.join()
             print('\nVideo saved.')
 
 if __name__ == '__main__':
     recorder = Encoder()
-    recorder.start_recording()
+    recorder.start_windows_recording()

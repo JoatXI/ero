@@ -1,6 +1,4 @@
-import platform
-import datetime
-import sys
+import platform, datetime, sys
 
 class FFmpegSettings:
     os = platform.system()
