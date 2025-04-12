@@ -1,7 +1,8 @@
-import platform, datetime, sys
+import platform, datetime, sys, os
 
 class FFmpegSettings:
-    os = platform.system()
+    output_directory = os.path.expanduser("~/Videos")
+    operating_sys = platform.system()
     fps = 30
 
     @classmethod
@@ -9,19 +10,19 @@ class FFmpegSettings:
         """
         Sets the video inputs based on users operating system
         """
-        return cls.os
-
+        return cls.operating_sys
+    
     @classmethod
     def set_audio_inputs(cls):
         """
         Sets the audio inputs based on users operating system
         Returns the audio device and format as two-string tuple
         """
-        if cls.os == "Windows":
+        if cls.operating_sys == "Windows":
             audio_device = "Stereo Mix (Realtek(R) Audio)"
             input_format = "dshow"
             return audio_device, input_format
-        elif cls.os == "Linux":
+        elif cls.operating_sys == "Linux":
             audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo"
             input_format = "pulse"
             return audio_device, input_format
@@ -35,11 +36,11 @@ class FFmpegSettings:
         Returns the video input and format as two-string tuple
         """
         try:
-            if cls.os == "Windows":
+            if cls.operating_sys == "Windows":
                 video_input = "desktop"
                 f_video = "gdigrab"
                 return video_input, f_video
-            elif cls.os == "Linux":
+            elif cls.operating_sys == "Linux":
                 video_input = ":0.0"
                 f_video = "x11grab"
                 return video_input, f_video
@@ -61,6 +62,11 @@ class FFmpegSettings:
             raise ValueError("Invalid FPS value")
 
     @classmethod
+    def set_output_directory(cls, directory):
+        if directory and os.path.isdir(directory):
+            cls.output_directory = directory
+
+    @classmethod
     def set_output(cls):
         """
         Gets the current framerate setting
@@ -69,4 +75,8 @@ class FFmpegSettings:
         framerate as string and integer tuple
         """
         file_name = f"{datetime.datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.mp4"
+        
+        if cls.output_directory and os.path.isdir(cls.output_directory):
+            file_name = os.path.join(cls.output_directory, file_name)
+            
         return file_name, cls.fps

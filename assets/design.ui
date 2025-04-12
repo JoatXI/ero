@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>837</width>
-    <height>754</height>
+    <width>585</width>
+    <height>550</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Ẹro</string>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -67,7 +67,7 @@ border-color: rgb(255, 255, 255);</string>
         </property>
         <property name="styleSheet">
          <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(0, 0, 0);</string>
+background-color: rgb(19, 20, 26);</string>
         </property>
         <property name="text">
          <string>Live Preview</string>
@@ -138,7 +138,7 @@ background-color: rgb(0, 0, 0);</string>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>40</height>
+            <height>39</height>
            </size>
           </property>
           <property name="focusPolicy">
@@ -165,6 +165,9 @@ background-color: rgb(0, 0, 0);</string>
             <width>16777215</width>
             <height>40</height>
            </size>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="styleSheet">
            <string notr="true">background-color: rgb(46, 75, 123);</string>
@@ -194,8 +197,11 @@ background-color: rgb(0, 0, 0);</string>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>40</height>
+            <height>39</height>
            </size>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="styleSheet">
            <string notr="true">background-color: rgb(46, 75, 123);</string>
@@ -216,6 +222,9 @@ background-color: rgb(0, 0, 0);</string>
             <height>40</height>
            </size>
           </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
           <property name="styleSheet">
            <string notr="true">background-color: rgb(46, 75, 123);</string>
           </property>
@@ -235,7 +244,7 @@ background-color: rgb(0, 0, 0);</string>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>40</height>
+            <height>39</height>
            </size>
           </property>
           <property name="focusPolicy">
@@ -283,6 +292,9 @@ background-color: rgb(0, 0, 0);</string>
             <width>16777215</width>
             <height>40</height>
            </size>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
           </property>
           <property name="styleSheet">
            <string notr="true">background-color: rgb(46, 75, 123);</string>
@@ -437,22 +449,44 @@ background-color: rgb(0, 0, 0);</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>837</width>
+     <width>585</width>
      <height>43</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSettings">
-    <property name="title">
-     <string>Settings</string>
+    <property name="font">
+     <font>
+      <family>Sans Serif Collection</family>
+      <pointsize>8</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
     </property>
-    <addaction name="autoButton"/>
+    <property name="cursor">
+     <cursorShape>PointingHandCursor</cursorShape>
+    </property>
+    <property name="title">
+     <string>Automation</string>
+    </property>
+    <addaction name="settingsButton"/>
    </widget>
    <addaction name="menuSettings"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
-  <action name="autoButton">
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <action name="settingsButton">
    <property name="text">
-    <string>Automation</string>
+    <string>Settings</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Sans Serif Collection</family>
+     <pointsize>10</pointsize>
+    </font>
    </property>
   </action>
  </widget>
