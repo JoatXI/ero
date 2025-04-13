@@ -1,7 +1,18 @@
-import platform, datetime, sys, os
+import platform, datetime, json, sys, os
+
+CONFIG_FILE = "path.json"
+
+def load_config_path():
+    if not os.path.exists(CONFIG_FILE):
+        return os.path.expanduser("~/Videos")
+    with open(CONFIG_FILE, "r") as file:
+        config = json.load(file)
+        save_directory = [value for key, value in config.items() if value]
+        if save_directory: return save_directory[0]
+        return os.path.expanduser("~/Videos")
 
 class FFmpegSettings:
-    output_directory = os.path.expanduser("~/Videos")
+    output_directory = load_config_path()
     operating_sys = platform.system()
     fps = 30
 
@@ -60,11 +71,6 @@ class FFmpegSettings:
             cls.fps = fps_value
         else:
             raise ValueError("Invalid FPS value")
-
-    @classmethod
-    def set_output_directory(cls, directory):
-        if directory and os.path.isdir(directory):
-            cls.output_directory = directory
 
     @classmethod
     def set_output(cls):

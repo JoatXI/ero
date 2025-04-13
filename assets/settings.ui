@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
+ <class>Settings</class>
  <widget class="QDialog" name="Settings">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>530</width>
-    <height>440</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>530</width>
-    <height>440</height>
+    <height>540</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>530</width>
-    <height>440</height>
+    <height>540</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -89,7 +89,7 @@ border-color: rgb(255, 255, 255);</string>
     <rect>
      <x>20</x>
      <y>10</y>
-     <width>291</width>
+     <width>281</width>
      <height>37</height>
     </rect>
    </property>
@@ -112,45 +112,14 @@ border-color: rgb(255, 255, 255);</string>
     <string notr="true">font: 10pt &quot;Sans Serif Collection&quot;;</string>
    </property>
    <property name="text">
-    <string>For Automation feature select the option below.</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="applyButton">
-   <property name="geometry">
-    <rect>
-     <x>425</x>
-     <y>390</y>
-     <width>80</width>
-     <height>30</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>40</height>
-    </size>
-   </property>
-   <property name="cursor">
-    <cursorShape>PointingHandCursor</cursorShape>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(46, 75, 123);</string>
-   </property>
-   <property name="text">
-    <string>Apply</string>
+    <string>For Automation feature check the box below.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>22</x>
-     <y>325</y>
+     <y>420</y>
      <width>441</width>
      <height>37</height>
     </rect>
@@ -166,7 +135,7 @@ border-color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>22</x>
-     <y>270</y>
+     <y>262</y>
      <width>80</width>
      <height>40</height>
     </rect>
@@ -321,7 +290,7 @@ border-color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>119</x>
-     <y>270</y>
+     <y>262</y>
      <width>300</width>
      <height>40</height>
     </rect>
@@ -342,8 +311,8 @@ border-color: rgb(255, 255, 255);</string>
   <widget class="QPushButton" name="cancelButton">
    <property name="geometry">
     <rect>
-     <x>330</x>
-     <y>390</y>
+     <x>425</x>
+     <y>490</y>
      <width>80</width>
      <height>30</height>
     </rect>
@@ -373,8 +342,8 @@ border-color: rgb(255, 255, 255);</string>
   <widget class="QPushButton" name="saveButton">
    <property name="geometry">
     <rect>
-     <x>235</x>
-     <y>390</y>
+     <x>335</x>
+     <y>490</y>
      <width>80</width>
      <height>30</height>
     </rect>
@@ -405,7 +374,7 @@ border-color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>22</x>
-     <y>345</y>
+     <y>440</y>
      <width>411</width>
      <height>37</height>
     </rect>
@@ -417,6 +386,97 @@ border-color: rgb(255, 255, 255);</string>
     <string>screen recording when opened. Leave uncheck if you do not want this feature.</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="savePath">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>370</y>
+     <width>80</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>40</height>
+    </size>
+   </property>
+   <property name="cursor">
+    <cursorShape>PointingHandCursor</cursorShape>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(46, 75, 123);</string>
+   </property>
+   <property name="text">
+    <string>Browse</string>
+   </property>
+   <property name="default">
+    <bool>false</bool>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>22</x>
+     <y>345</y>
+     <width>391</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 10pt &quot;Sans Serif Collection&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Select Recording Path To Save Your Recordings</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="pathText">
+   <property name="geometry">
+    <rect>
+     <x>119</x>
+     <y>370</y>
+     <width>300</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(46, 75, 123);</string>
+   </property>
+   <property name="frame">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <zorder>checkBox</zorder>
+  <zorder>optionPrompt</zorder>
+  <zorder>autoPrompt</zorder>
+  <zorder>label</zorder>
+  <zorder>trackApp_3</zorder>
+  <zorder>trackApp_1</zorder>
+  <zorder>trackApp_2</zorder>
+  <zorder>appText_2</zorder>
+  <zorder>appText_1</zorder>
+  <zorder>appText_3</zorder>
+  <zorder>cancelButton</zorder>
+  <zorder>saveButton</zorder>
+  <zorder>label_2</zorder>
+  <zorder>label_3</zorder>
+  <zorder>savePath</zorder>
+  <zorder>pathText</zorder>
  </widget>
  <resources/>
  <connections/>
