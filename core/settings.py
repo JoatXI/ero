@@ -1,48 +1,74 @@
-import subprocess
 import platform
-import cpuinfo
-import GPUtil
+import datetime
+import sys
 
 class FFmpegSettings:
-    def __init__(self):
-        self.nvidia_gpu = GPUtil.getGPUs()
-        self.info = cpuinfo.get_cpu_info()
-        self.os = platform.system()
-        self.amd_gpu = False
-        
-    def __repr__(self):
-        return f"\nSettings(os={self.os}, CPU={self.info}, Nvidia GPU={self.nvidia_gpu}, AMD GPU?={self.amd_gpu})"
-    
-    def set_audio_inputs(self):
-        if self.os == "Windows":
+    os = platform.system()
+    fps = 30
+
+    @classmethod
+    def get_operating_system(cls):
+        """
+        Sets the video inputs based on users operating system
+        """
+        return cls.os
+
+    @classmethod
+    def set_audio_inputs(cls):
+        """
+        Sets the audio inputs based on users operating system
+        Returns the audio device and format as two-string tuple
+        """
+        if cls.os == "Windows":
             audio_device = "Stereo Mix (Realtek(R) Audio)"
             input_format = "dshow"
             return audio_device, input_format
-        elif self.os == "Linux":
-            audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo.monitor"
+        elif cls.os == "Linux":
+            audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo"
             input_format = "pulse"
             return audio_device, input_format
-        raise Exception("Unknown Operating System")
+        else:
+            raise Exception("Unknown Operating System")
 
-    def set_encoder(self):
-        print(self.os)
-        
-        if self.os == "Windows":
-            process = subprocess.check_output(["wmic", "path", "win32_VideoController", "get", "name"]).decode()
-            self.amd_gpu = any(keyword in process for keyword in ["AMD", "Radeon"])
-        elif self.os == "Linux":
-            output = subprocess.check_output("lspci", shell=True).decode()
-            self.amd_gpu = any("AMD" in line or "Radeon" in line for line in output.splitlines())
-
+    @classmethod
+    def set_video_inputs(cls):
+        """
+        Sets the video inputs based on users operating system.
+        Returns the video input and format as two-string tuple
+        """
         try:
-            if self.nvidia_gpu:
-                return "h264_nvenc"
-            elif "Intel" in self.info.get("brand_raw", "") and not self.nvidia_gpu:
-                return "h264_qsv"
-            elif "AMD" in self.info.get("brand_raw", "") or self.amd_gpu:
-                return "h264_amf"
+            if cls.os == "Windows":
+                video_input = "desktop"
+                f_video = "gdigrab"
+                return video_input, f_video
+            elif cls.os == "Linux":
+                video_input = ":0.0"
+                f_video = "x11grab"
+                return video_input, f_video
             else:
-                return "libx264"
+                raise Exception("Unsupported Operating System")
         except Exception as e:
-            print("Error setting encoder:", e)
-            return "libx264"
+            print("Error occurred while setting video inputs:", e)
+            sys.exit(1)
+
+    @classmethod
+    def set_fps(cls, fps_value):
+        """
+        Set the framerate value.
+        Allowed values are only 30 or 60.
+        """
+        if fps_value in (30, 60):
+            cls.fps = fps_value
+        else:
+            raise ValueError("Invalid FPS value")
+
+    @classmethod
+    def set_output(cls):
+        """
+        Gets the current framerate setting
+        and sets the output file name.
+        Returns the output file name and 
+        framerate as string and integer tuple
+        """
+        file_name = f"{datetime.datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.mp4"
+        return file_name, cls.fps

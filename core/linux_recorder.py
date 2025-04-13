@@ -18,9 +18,9 @@ class Encoder:
             ffmpeg = (
                 FFmpeg()
                 .option("y")
-                .input(self.video_input, f=self.f_video, framerate=self.fps, offset_x=0, offset_y=0, video_size=f"{self.width}x{self.height}")
-                .input(f"audio={self.audio_device}", rtbufsize="1024M", f=self.input_format, ac=2, ar=22050, channel_layout="stereo", audio_buffer_size="80m", itsoffset=0.5)
-                .output(self.file_name, acodec="libmp3lame", vcodec="libx264", crf=23, preset="ultrafast", pix_fmt="yuv420p")
+                .input(self.video_input, video_size=f"{self.width}x{self.height}", framerate=self.fps, f=self.f_video)
+                .input(self.audio_device, f=self.input_format, ac=2, sample_rate=44100, channels=2, itsoffset=0.5)
+                .output(self.file_name, acodec="libmp3lame", vcodec="libx264", crf=28, preset="ultrafast")
             )
             
             @ffmpeg.on("progress")
@@ -50,7 +50,7 @@ class Encoder:
         
         encoding_thread = threading.Thread(target=self.ffmpeg_encoder)
         encoding_thread.start()
-        
+
         with keyboard.Listener(on_press=self.on_press) as listener:
             encoding_thread.join()
             print('\nVideo saved.')
