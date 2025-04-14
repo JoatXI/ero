@@ -1,35 +1,24 @@
+import subprocess, platform, signal, json, sys, os
 from linux_recorder import LinuxEncoder
 from PyQt5.QtGui import QPixmap, QImage
 from settings import FFmpegSettings
 from PyQt5.QtCore import QTimer, Qt
-import platform, json, sys, os
 from PyQt5.QtWidgets import *
 from recorder import Encoder
 from PyQt5 import uic
 import mss
 
 CONFIG_FILE = "config.json"
-PATH_FILE = "path.json"
 
 def load_app_config():
     if not os.path.exists(CONFIG_FILE):
-        return {"app_1": "", "app_2": "", "app_3": ""}
+        return {"app_1": "", "app_2": "", "app_3": "", "chosen_dir": "", "automate": False}
     with open(CONFIG_FILE, "r") as file:
-        return json.load(file)
-
-def path_loader():
-    if not os.path.exists(PATH_FILE):
-        return {"chosen_dir": os.path.expanduser("~/Videos")}
-    with open(PATH_FILE, "r") as file:
         return json.load(file)
 
 def save_app_config(config):
     with open(CONFIG_FILE, "w") as file:
         json.dump(config, file, indent=4)
-        
-def set_output_path(dir):
-    with open(PATH_FILE, "w") as file:
-        json.dump(dir, file, indent=4)
 
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
@@ -39,22 +28,24 @@ class SettingsDialog(QDialog):
         self.browse_button1 = self.findChild(QPushButton, "trackApp_1")
         self.browse_button2 = self.findChild(QPushButton, "trackApp_2")
         self.browse_button3 = self.findChild(QPushButton, "trackApp_3")
+        
         self.app_text_1 = self.findChild(QLineEdit, "appText_1")
         self.app_text_2 = self.findChild(QLineEdit, "appText_2")
         self.app_text_3 = self.findChild(QLineEdit, "appText_3")
         self.path_text = self.findChild(QLineEdit, "pathText")
+        
         self.path_btn = self.findChild(QPushButton, "savePath")
         self.save_button = self.findChild(QPushButton, "saveButton")
         self.cancel_button = self.findChild(QPushButton, "cancelButton")
+        self.checkbox_automation = self.findChild(QCheckBox, "checkBox")
         
         config = load_app_config()
-        save_directory = path_loader()
         
         self.app_text_1.setText(config.get("app_1", ""))
         self.app_text_2.setText(config.get("app_2", ""))
         self.app_text_3.setText(config.get("app_3", ""))
-        
-        checked_path = save_directory.get("chosen_dir", "")
+        checked_path = config.get("chosen_dir", "")
+        self.checkbox_automation.setChecked(config.get("automate", False))
         if checked_path:
             self.path_text.setText(checked_path)
         else:
@@ -83,15 +74,11 @@ class SettingsDialog(QDialog):
         config = {
             "app_1": self.app_text_1.text(),
             "app_2": self.app_text_2.text(),
-            "app_3": self.app_text_3.text()
+            "app_3": self.app_text_3.text(),
+            "chosen_dir": self.path_text.text().strip(),
+            "automate": self.checkbox_automation.isChecked()
         }
-        path = {
-            "chosen_dir": self.path_text.text().strip()
-        }
-        
         save_app_config(config)
-        if path:
-            set_output_path(path)
         self.close()
 
 class MyGUI(QMainWindow):
@@ -102,6 +89,8 @@ class MyGUI(QMainWindow):
         self.os = platform.system()
         self.recording = False
         self.sct = mss.mss()
+        self.automation_process = None
+        self.config = load_app_config()
         
         self.counter = 0
         self.display_counter = QTimer()
@@ -117,6 +106,9 @@ class MyGUI(QMainWindow):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_preview)
         self.timer.start(1)
+
+        if self.config.get("automate", False):
+            self.automation_starter()
         
     def initUI(self):
         self.live_preview = self.findChild(QLabel, "livePreview")
@@ -134,8 +126,8 @@ class MyGUI(QMainWindow):
         
         self.start_button.clicked.connect(self.start_recording)
         self.stop_button.clicked.connect(self.stop_recording)
-        if self.settings_button:
-            self.settings_button.triggered.connect(self.open_settings_dialog)
+        
+        self.settings_button.triggered.connect(self.open_settings_dialog)
         
     def update_preview(self):
         monitor = self.sct.monitors[1]
@@ -151,6 +143,13 @@ class MyGUI(QMainWindow):
     def open_settings_dialog(self):
         settings_dialog = SettingsDialog(self)
         settings_dialog.exec_()
+        
+        self.config = load_app_config()
+
+        if self.config.get("automate", False) and not self.recording:
+            self.automation_starter()
+        else:
+            self.automation_stopper()
 
     def update_time_label(self):
         self.counter += 1
@@ -159,8 +158,24 @@ class MyGUI(QMainWindow):
         seconds = self.counter % 60
         self.time_label.setText(f"{hours:02}:{minutes:02}:{seconds:02}")
 
+    def automation_starter(self):
+        if not self.automation_process:
+            if platform.system() == "Windows":
+                self.automation_process = subprocess.Popen(['python', "core/automate.py"])
+            elif platform.system() == "Linux":
+                self.automation_process = subprocess.Popen(["python3", "core/automate.py"])
+    
+    def automation_stopper(self):
+        if self.automation_process:
+            self.automation_process.send_signal(signal.SIGINT)
+            self.automation_process.wait()
+            self.automation_process = None
+    
     def start_recording(self):
         if not self.recording:
+            if self.automation_process:
+                self.automation_stopper()
+            
             selected_fps = int(self.fps_options.currentText())
             self.settings.set_fps(selected_fps)
             
@@ -194,6 +209,9 @@ class MyGUI(QMainWindow):
 
             self.start_button.setEnabled(True)
             self.stop_button.setEnabled(False)
+            
+            if self.config.get("automate", False):
+                self.automation_starter()
 
     def closeEvent(self, event):
         if self.recording:
@@ -213,14 +231,18 @@ class MyGUI(QMainWindow):
 
                 self.display_counter.stop()
                 self.recording = False
+                if self.automation_process:
+                    self.automation_stopper()
                 event.accept()
             else:
                 event.ignore()
         else:
+            if self.automation_process:
+                self.automation_stopper()
             event.accept()
     
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyGUI()
     window.show()
-    app.exec_()
+    sys.exit(app.exec_())

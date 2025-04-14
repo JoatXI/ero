@@ -1,5 +1,7 @@
 {
-    "app_1": "git-bash.exe",
+    "app_1": "",
     "app_2": "",
-    "app_3": ""
+    "app_3": "",
+    "chosen_dir": "",
+    "automate": false
 }

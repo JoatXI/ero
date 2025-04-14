@@ -40,7 +40,7 @@ border-color: rgb(255, 255, 255);</string>
   <widget class="QCheckBox" name="checkBox">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>22</x>
      <y>48</y>
      <width>221</width>
      <height>37</height>
@@ -65,8 +65,8 @@ border-color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="optionPrompt">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>87</y>
+     <x>22</x>
+     <y>95</y>
      <width>321</width>
      <height>37</height>
     </rect>
@@ -87,7 +87,7 @@ border-color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="autoPrompt">
    <property name="geometry">
     <rect>
-     <x>20</x>
+     <x>22</x>
      <y>10</y>
      <width>281</width>
      <height>37</height>
@@ -113,22 +113,6 @@ border-color: rgb(255, 255, 255);</string>
    </property>
    <property name="text">
     <string>For Automation feature check the box below.</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>22</x>
-     <y>420</y>
-     <width>441</width>
-     <height>37</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 8pt &quot;Sans Serif Collection&quot;;</string>
-   </property>
-   <property name="text">
-    <string>NOTE: By checking &quot;Launch On System Startup&quot; the selected application(s) will start</string>
    </property>
   </widget>
   <widget class="QPushButton" name="trackApp_3">
@@ -370,27 +354,11 @@ border-color: rgb(255, 255, 255);</string>
     <string>Save</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>22</x>
-     <y>440</y>
-     <width>411</width>
-     <height>37</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">font: 8pt &quot;Sans Serif Collection&quot;;</string>
-   </property>
-   <property name="text">
-    <string>screen recording when opened. Leave uncheck if you do not want this feature.</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="savePath">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>370</y>
+     <x>22</x>
+     <y>360</y>
      <width>80</width>
      <height>40</height>
     </rect>
@@ -423,11 +391,11 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
      <x>22</x>
-     <y>345</y>
+     <y>330</y>
      <width>391</width>
      <height>31</height>
     </rect>
@@ -436,14 +404,14 @@ border-color: rgb(255, 255, 255);</string>
     <string notr="true">font: 10pt &quot;Sans Serif Collection&quot;;</string>
    </property>
    <property name="text">
-    <string>Select Recording Path To Save Your Recordings</string>
+    <string>Select A Folder To Save Your Video Recordings</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="pathText">
    <property name="geometry">
     <rect>
      <x>119</x>
-     <y>370</y>
+     <y>360</y>
      <width>300</width>
      <height>40</height>
     </rect>
@@ -461,10 +429,41 @@ border-color: rgb(255, 255, 255);</string>
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QTextBrowser" name="textBrowser">
+   <property name="geometry">
+    <rect>
+     <x>18</x>
+     <y>402</y>
+     <width>481</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::NoFrame</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <property name="verticalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="horizontalScrollBarPolicy">
+    <enum>Qt::ScrollBarAlwaysOff</enum>
+   </property>
+   <property name="html">
+    <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif Collection'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; line-height:60%;&quot;&gt;&lt;span style=&quot; font-size:7pt; font-weight:600;&quot;&gt;NOTE: By checking &amp;quot;Launch On System Startup&amp;quot; the selected application(s) will start screen recording when opened. Leave uncheck if you do not want this feature.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
   <zorder>checkBox</zorder>
   <zorder>optionPrompt</zorder>
   <zorder>autoPrompt</zorder>
-  <zorder>label</zorder>
   <zorder>trackApp_3</zorder>
   <zorder>trackApp_1</zorder>
   <zorder>trackApp_2</zorder>
@@ -473,10 +472,10 @@ border-color: rgb(255, 255, 255);</string>
   <zorder>appText_3</zorder>
   <zorder>cancelButton</zorder>
   <zorder>saveButton</zorder>
-  <zorder>label_2</zorder>
-  <zorder>label_3</zorder>
+  <zorder>label</zorder>
   <zorder>savePath</zorder>
   <zorder>pathText</zorder>
+  <zorder>textBrowser</zorder>
  </widget>
  <resources/>
  <connections/>

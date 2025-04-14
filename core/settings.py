@@ -1,21 +1,23 @@
 import platform, datetime, json, sys, os
 
-CONFIG_FILE = "path.json"
+CONFIG_FILE = "config.json"
 
 def load_config_path():
     if not os.path.exists(CONFIG_FILE):
         return os.path.expanduser("~/Videos")
     with open(CONFIG_FILE, "r") as file:
         config = json.load(file)
-        save_directory = [value for key, value in config.items() if value]
-        if save_directory: return save_directory[0]
+        if config: return config["chosen_dir"]
         return os.path.expanduser("~/Videos")
 
 class FFmpegSettings:
-    output_directory = load_config_path()
     operating_sys = platform.system()
     fps = 30
 
+    @classmethod
+    def get_output_directory(cls):
+        return load_config_path()
+    
     @classmethod
     def get_operating_system(cls):
         """
@@ -58,7 +60,6 @@ class FFmpegSettings:
             else:
                 raise Exception("Unsupported Operating System")
         except Exception as e:
-            print("Error occurred while setting video inputs:", e)
             sys.exit(1)
 
     @classmethod
@@ -82,7 +83,8 @@ class FFmpegSettings:
         """
         file_name = f"{datetime.datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.mp4"
         
-        if cls.output_directory and os.path.isdir(cls.output_directory):
-            file_name = os.path.join(cls.output_directory, file_name)
+        output_dir = cls.get_output_directory()
+        if output_dir and os.path.isdir(output_dir):
+            file_name = os.path.join(output_dir, file_name)
             
         return file_name, cls.fps

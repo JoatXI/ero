@@ -24,18 +24,11 @@ class Encoder:
             
             @ffmpeg.on("progress")
             def time_to_terminate(progress: Progress):
-                print(progress)
                 if not self.running:
-                    print('\nterminating recording...')
                     ffmpeg.terminate()
                     
-            print('\nencoding video...\n')
             ffmpeg.execute()
-        
         except FFmpegError as exception:
-            print("An exception has occurred!")
-            print("- Message from ffmpeg:", exception.message)
-            print("- Arguments to execute ffmpeg:", exception.arguments)
             sys.exit(1)
 
     def start_windows_recording(self):
@@ -44,11 +37,9 @@ class Encoder:
         self.encoding_thread.start()
     
     def stop_windows_recording(self):
-        print("\nStopping Recording...")
         self.running = False
         if self.encoding_thread:
             self.encoding_thread.join()
-            print('\nVideo saved.')
 
 if __name__ == '__main__':
     recorder = Encoder()
