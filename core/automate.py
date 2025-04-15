@@ -56,7 +56,6 @@ def automate_recoder():
                 elif platform.system() == "Linux":
                     linux_recorder.stop_linux_recording()
                     recording_started = False
-                
                 system_notification('Ẹro', 'Application recording stopped')
 
             time.sleep(2)

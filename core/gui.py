@@ -167,7 +167,7 @@ class MyGUI(QMainWindow):
     
     def automation_stopper(self):
         if self.automation_process:
-            self.automation_process.send_signal(signal.SIGINT)
+            self.automation_process.terminate()
             self.automation_process.wait()
             self.automation_process = None
     
