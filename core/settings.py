@@ -1,29 +1,41 @@
-import platform
-import datetime
-import sys
+import platform, datetime, json, sys, os
+
+CONFIG_FILE = "config.json"
+
+def load_config_path():
+    if not os.path.exists(CONFIG_FILE):
+        return os.path.expanduser("~/Videos")
+    with open(CONFIG_FILE, "r") as file:
+        config = json.load(file)
+        if config: return config["chosen_dir"]
+        return os.path.expanduser("~/Videos")
 
 class FFmpegSettings:
-    os = platform.system()
+    operating_sys = platform.system()
     fps = 30
 
+    @classmethod
+    def get_output_directory(cls):
+        return load_config_path()
+    
     @classmethod
     def get_operating_system(cls):
         """
         Sets the video inputs based on users operating system
         """
-        return cls.os
-
+        return cls.operating_sys
+    
     @classmethod
     def set_audio_inputs(cls):
         """
         Sets the audio inputs based on users operating system
         Returns the audio device and format as two-string tuple
         """
-        if cls.os == "Windows":
+        if cls.operating_sys == "Windows":
             audio_device = "Stereo Mix (Realtek(R) Audio)"
             input_format = "dshow"
             return audio_device, input_format
-        elif cls.os == "Linux":
+        elif cls.operating_sys == "Linux":
             audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo"
             input_format = "pulse"
             return audio_device, input_format
@@ -37,18 +49,17 @@ class FFmpegSettings:
         Returns the video input and format as two-string tuple
         """
         try:
-            if cls.os == "Windows":
+            if cls.operating_sys == "Windows":
                 video_input = "desktop"
                 f_video = "gdigrab"
                 return video_input, f_video
-            elif cls.os == "Linux":
+            elif cls.operating_sys == "Linux":
                 video_input = ":0.0"
                 f_video = "x11grab"
                 return video_input, f_video
             else:
                 raise Exception("Unsupported Operating System")
         except Exception as e:
-            print("Error occurred while setting video inputs:", e)
             sys.exit(1)
 
     @classmethod
@@ -71,4 +82,9 @@ class FFmpegSettings:
         framerate as string and integer tuple
         """
         file_name = f"{datetime.datetime.now().strftime('%Y_%m_%d %H_%M_%S')}.mp4"
+        
+        output_dir = cls.get_output_directory()
+        if output_dir and os.path.isdir(output_dir):
+            file_name = os.path.join(output_dir, file_name)
+            
         return file_name, cls.fps

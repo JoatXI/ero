@@ -1,112 +1,248 @@
-from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QLabel,
-    QPushButton, QVBoxLayout, QHBoxLayout, QComboBox
-)
-from pynput.keyboard import Controller, Key
+import subprocess, platform, signal, json, sys, os
+from linux_recorder import LinuxEncoder
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtCore import QTimer, Qt
 from settings import FFmpegSettings
+from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtWidgets import *
 from recorder import Encoder
-import threading
+from PyQt5 import uic
 import mss
-import sys
 
-class RecorderGUI(QMainWindow):
+CONFIG_FILE = "config.json"
+
+def load_app_config():
+    if not os.path.exists(CONFIG_FILE):
+        return {"app_1": "", "app_2": "", "app_3": "", "chosen_dir": "", "automate": False}
+    with open(CONFIG_FILE, "r") as file:
+        return json.load(file)
+
+def save_app_config(config):
+    with open(CONFIG_FILE, "w") as file:
+        json.dump(config, file, indent=4)
+
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None):
+        super(SettingsDialog, self).__init__(parent)
+        uic.loadUi("assets/settings.ui", self)
+        
+        self.browse_button1 = self.findChild(QPushButton, "trackApp_1")
+        self.browse_button2 = self.findChild(QPushButton, "trackApp_2")
+        self.browse_button3 = self.findChild(QPushButton, "trackApp_3")
+        
+        self.app_text_1 = self.findChild(QLineEdit, "appText_1")
+        self.app_text_2 = self.findChild(QLineEdit, "appText_2")
+        self.app_text_3 = self.findChild(QLineEdit, "appText_3")
+        self.path_text = self.findChild(QLineEdit, "pathText")
+        
+        self.path_btn = self.findChild(QPushButton, "savePath")
+        self.save_button = self.findChild(QPushButton, "saveButton")
+        self.cancel_button = self.findChild(QPushButton, "cancelButton")
+        self.checkbox_automation = self.findChild(QCheckBox, "checkBox")
+        
+        config = load_app_config()
+        
+        self.app_text_1.setText(config.get("app_1", ""))
+        self.app_text_2.setText(config.get("app_2", ""))
+        self.app_text_3.setText(config.get("app_3", ""))
+        checked_path = config.get("chosen_dir", "")
+        self.checkbox_automation.setChecked(config.get("automate", False))
+        if checked_path:
+            self.path_text.setText(checked_path)
+        else:
+            self.path_text.setText(os.path.expanduser("~/Videos"))
+        
+        self.browse_button1.clicked.connect(lambda: self.browse_app(self.app_text_1))
+        self.browse_button2.clicked.connect(lambda: self.browse_app(self.app_text_2))
+        self.browse_button3.clicked.connect(lambda: self.browse_app(self.app_text_3))
+        self.path_btn.clicked.connect(lambda: self.path_browse(self.path_text))
+        
+        self.save_button.clicked.connect(self.save_settings)
+        self.cancel_button.clicked.connect(self.reject)
+        
+    def browse_app(self, line_edit):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Select Application Executable")
+        if file_path:
+            app_name = os.path.basename(file_path)
+            line_edit.setText(app_name)
+    
+    def path_browse(self, line_text):
+        directory = QFileDialog.getExistingDirectory(self, "Select Save Directory", "")
+        if directory:
+            line_text.setText(directory)
+    
+    def save_settings(self):
+        config = {
+            "app_1": self.app_text_1.text(),
+            "app_2": self.app_text_2.text(),
+            "app_3": self.app_text_3.text(),
+            "chosen_dir": self.path_text.text().strip(),
+            "automate": self.checkbox_automation.isChecked()
+        }
+        save_app_config(config)
+        self.close()
+
+class MyGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Ẹro")
-        self.is_recording = False
-        self.encoder_instance = None
-        self.encoder_thread = None
-        self.keyboard_controller = Controller()
+        uic.loadUi("assets/design.ui", self)
+        self.settings = FFmpegSettings()
+        self.os = platform.system()
+        self.recording = False
         self.sct = mss.mss()
-
+        self.automation_process = None
+        self.config = load_app_config()
+        
+        self.counter = 0
+        self.display_counter = QTimer()
+        self.display_counter.timeout.connect(self.update_time_label)
+        
         screen = QApplication.primaryScreen()
         size = screen.size()
         self.original_screen_width = size.width()
         self.original_screen_height = size.height()
-
-        self.preview_min_width = 640
-        self.preview_min_height = 480
-        self.preview_max_width = self.original_screen_width
-        self.preview_max_height = self.original_screen_height
-
+        
         self.initUI()
-
-        # QTimer for live preview updates (every 1ms)
+        
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_preview)
         self.timer.start(1)
 
+        if self.config.get("automate", False):
+            self.automation_starter()
+        
     def initUI(self):
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-
-        self.preview_label = QLabel("Live Preview")
-        self.preview_label.setAlignment(Qt.AlignCenter)
-        self.preview_label.setMinimumSize(self.preview_min_width, self.preview_min_height)
-        self.preview_label.setMaximumSize(self.preview_max_width, self.preview_max_height)
-
-        self.fps_combo = QComboBox()
-        self.fps_combo.addItems(["30", "60"])
-        self.fps_combo.setCurrentText("30")
-
-        self.start_button = QPushButton("Start Recording")
+        self.live_preview = self.findChild(QLabel, "livePreview")
+        self.fps_options = self.findChild(QComboBox, "fpsOptions")
+        self.start_button = self.findChild(QPushButton, "startButton")
+        self.stop_button = self.findChild(QPushButton, "stopButton")
+        self.settings_button = self.findChild(QAction, "settingsButton")
+        self.time_label = self.findChild(QLabel, "timeLabel")
+        
+        self.fps_options.addItems(["30", "60"])
+        self.fps_options.setCurrentText("30")
+        
+        self.live_preview.setAlignment(Qt.AlignCenter)
+        self.live_preview.setMaximumSize(self.original_screen_width, self.original_screen_height)
+        
         self.start_button.clicked.connect(self.start_recording)
-        self.stop_button = QPushButton("Stop Recording")
         self.stop_button.clicked.connect(self.stop_recording)
-        self.stop_button.setEnabled(False)
-
-        # Layout setup
-        vbox = QVBoxLayout()
-        vbox.addWidget(self.preview_label)
-        vbox.addWidget(self.fps_combo)
-        hbox = QHBoxLayout()
-        hbox.addWidget(self.start_button)
-        hbox.addWidget(self.stop_button)
-        vbox.addLayout(hbox)
-        central_widget.setLayout(vbox)
-
+        
+        self.settings_button.triggered.connect(self.open_settings_dialog)
+        
     def update_preview(self):
         monitor = self.sct.monitors[1]
         sct_img = self.sct.grab(monitor)
-
-        # Calculate bytes per line (width * 4 because each pixel has 4 bytes)
         bytes_per_line = sct_img.width * 4
 
-        image = QImage(sct_img.bgra, sct_img.width, sct_img.height, bytes_per_line, QImage.Format_ARGB32)
-        
-        preview_size = self.preview_label.size()
-        scaled_image = image.scaled(preview_size.width(), preview_size.height(), Qt.KeepAspectRatio)
+        image = QImage(sct_img.bgra, sct_img.width, sct_img.height, bytes_per_line, QImage.Format_RGB32)
+        scaled_image = image.scaled(self.live_preview.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
         pixmap = QPixmap.fromImage(scaled_image)
-        self.preview_label.setPixmap(pixmap)
+        self.live_preview.setPixmap(pixmap)
 
+    def open_settings_dialog(self):
+        settings_dialog = SettingsDialog(self)
+        settings_dialog.exec_()
+        
+        self.config = load_app_config()
+
+        if self.config.get("automate", False) and not self.recording:
+            self.automation_starter()
+        else:
+            self.automation_stopper()
+
+    def update_time_label(self):
+        self.counter += 1
+        hours = self.counter // 3600
+        minutes = (self.counter % 3600) // 60
+        seconds = self.counter % 60
+        self.time_label.setText(f"{hours:02}:{minutes:02}:{seconds:02}")
+
+    def automation_starter(self):
+        if not self.automation_process:
+            if platform.system() == "Windows":
+                self.automation_process = subprocess.Popen(['python', "core/automate.py"])
+            elif platform.system() == "Linux":
+                self.automation_process = subprocess.Popen(["python3", "core/automate.py"])
+    
+    def automation_stopper(self):
+        if self.automation_process:
+            self.automation_process.terminate()
+            self.automation_process.wait()
+            self.automation_process = None
+    
     def start_recording(self):
-        if not self.is_recording:
-            selected_fps = int(self.fps_combo.currentText())
-            FFmpegSettings().set_fps(selected_fps)
-            print(f"Starting recording at {selected_fps} FPS...")
-            self.encoder_instance = Encoder()
-            self.encoder_thread = threading.Thread(target=self.encoder_instance.start_recording)
-            self.encoder_thread.start()
-            self.is_recording = True
+        if not self.recording:
+            if self.automation_process:
+                self.automation_stopper()
+            
+            selected_fps = int(self.fps_options.currentText())
+            self.settings.set_fps(selected_fps)
+            
+            if self.os == "Windows":
+                self.windows_encoder = Encoder()
+                self.windows_encoder.start_windows_recording()
+                self.recording = True
+            elif self.os == "Linux":
+                self.linux_encoder = LinuxEncoder()
+                self.linux_encoder.start_linux_recording()
+                self.recording = True
             self.start_button.setEnabled(False)
             self.stop_button.setEnabled(True)
-
+            
+            self.counter = 0
+            self.time_label.setText("00:00:00")
+            self.display_counter.start(1000)
+            
     def stop_recording(self):
-        if self.is_recording:
-            print("Stopping recording...")
-            self.keyboard_controller.press(Key.esc)
-            self.keyboard_controller.release(Key.esc)
-            if self.encoder_thread:
-                self.encoder_thread.join()
-            self.is_recording = False
+        if self.recording:
+            if self.os == "Windows":
+                self.windows_encoder.stop_windows_recording()
+                self.recording = False
+            elif self.os == "Linux":
+                self.linux_encoder.stop_linux_recording()
+                self.recording = False
+    
+            self.display_counter.stop()
+            self.counter = 0
+            self.time_label.setText("00:00:00")
+
             self.start_button.setEnabled(True)
             self.stop_button.setEnabled(False)
+            
+            if self.config.get("automate", False):
+                self.automation_starter()
 
+    def closeEvent(self, event):
+        if self.recording:
+            reply = QMessageBox.question(self,
+                "Recording in Progress",
+                "A recording is currently in progress."
+                "Are you sure you want to quit?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+
+            if reply == QMessageBox.Yes:
+                if self.os == "Windows":
+                    self.windows_encoder.stop_windows_recording()
+                elif self.os == "Linux":
+                    self.linux_encoder.stop_linux_recording()
+
+                self.display_counter.stop()
+                self.recording = False
+                if self.automation_process:
+                    self.automation_stopper()
+                event.accept()
+            else:
+                event.ignore()
+        else:
+            if self.automation_process:
+                self.automation_stopper()
+            event.accept()
+    
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = RecorderGUI()
+    window = MyGUI()
     window.show()
     sys.exit(app.exec_())
