@@ -18,16 +18,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.13'
-
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
+        python-version: '3.12'
 
     - name: Install dependencies
       run: |
@@ -38,5 +29,6 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest tests/ --verbose
+        pytest tests/test_automation.py
+        pytest tests/test_settings.py
       shell: pwsh
