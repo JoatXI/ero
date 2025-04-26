@@ -1,4 +1,4 @@
-import subprocess, platform, signal, json, sys, os
+import subprocess, platform, json, sys, os
 from linux_recorder import LinuxEncoder
 from PyQt5.QtGui import QPixmap, QImage
 from settings import FFmpegSettings

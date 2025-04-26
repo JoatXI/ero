@@ -36,7 +36,7 @@ class FFmpegSettings:
             input_format = "dshow"
             return audio_device, input_format
         elif cls.operating_sys == "Linux":
-            audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo"
+            audio_device = "alsa_output.pci-0000_00_1b.0.analog-stereo.monitor"
             input_format = "pulse"
             return audio_device, input_format
         else:

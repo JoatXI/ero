@@ -1,6 +1,7 @@
+import threading, sys, os
 from ffmpeg import FFmpeg, Progress, FFmpegError
-from settings import FFmpegSettings
-import threading, sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from core.settings import FFmpegSettings
 import pyautogui
 
 class LinuxEncoder:
@@ -29,6 +30,7 @@ class LinuxEncoder:
                     
             ffmpeg.execute()
         except FFmpegError as exception:
+            print("Error occured:", exception)
             sys.exit(1)
 
     def start_linux_recording(self):

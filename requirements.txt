@@ -1,6 +1,7 @@
 python-ffmpeg
 pyautogui
 psutil
+pytest
 plyer
 PyQt5
 mss

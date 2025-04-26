@@ -1,6 +1,7 @@
+import threading, sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from ffmpeg import FFmpeg, Progress, FFmpegError
-from settings import FFmpegSettings
-import threading, sys
+from core.settings import FFmpegSettings
 import pyautogui
 
 class Encoder:
@@ -29,6 +30,7 @@ class Encoder:
                     
             ffmpeg.execute()
         except FFmpegError as exception:
+            print("Error occured:", exception)
             sys.exit(1)
 
     def start_windows_recording(self):
