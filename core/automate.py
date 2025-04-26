@@ -1,7 +1,8 @@
-from linux_recorder import LinuxEncoder
 import platform, json, time, sys, os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from core.linux_recorder import LinuxEncoder
 from plyer import notification
-from recorder import Encoder
+from core.recorder import Encoder
 import psutil
 
 CONFIG_FILE = "config.json"
@@ -32,7 +33,7 @@ def system_notification(title, message):
         timeout=5
     )
 
-def automate_recoder():
+def automate_recorder():
     recording_started = False
     try:
         while True:
@@ -63,4 +64,4 @@ def automate_recoder():
         sys.exit(1)
 
 if __name__ == '__main__':
-    automate_recoder()
+    automate_recorder()
