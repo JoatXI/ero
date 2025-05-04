@@ -26,10 +26,6 @@
   <img src="assets/main_window.png" />
 </p>
 
-<p align="center">
-  <img src="assets/settings.png" />
-</p>
-
 ## Installation
 1. Clone the repository from GitHub:
 `git clone https://github.com/JoatXI/ero.git`
@@ -45,3 +41,7 @@
 2. In the GUI, click the Start Recording button to begin manual screen capture.
 3. Click Stop Recording to end the capture. The recorded video will be saved to the selected directory.
 4. Use the Settings window to enable automation, choose trigger applications (up to 3), and set the output folder. When automation is enabled, Ẹro will start recording automatically whenever any of the selected applications launch.
+
+<p align="center">
+  <img src="assets/settings.png" />
+</p>
